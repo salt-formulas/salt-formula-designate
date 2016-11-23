@@ -20,36 +20,46 @@ bind9_service:
       - file: /etc/bind/named.conf.options
 {%- endif %}
 
-designate_packages:
+designate_server_packages:
   pkg.installed:
     - names: {{ server.pkgs }}
 
 /etc/designate/designate.conf:
-  ini.options_present:
-    - sections: {{ server.designate_config }}
-    - require:
-        - pkg: designate_packages
+  file.managed:
+  - source: salt://designate/files/{{ server.version }}/designate.conf.{{ grains.os_family }}
+  - template: jinja
+  - require:
+    - pkg: designate_server_packages
 
-designate_db_sync:
+/etc/designate/api-paste.ini:
+  file.managed:
+  - source: salt://designate/files/{{ server.version }}/api-paste.ini
+  - template: jinja
+  - require:
+    - pkg: designate_server_packages
+
+designate_syncdb:
   cmd.run:
     - name: designate-manage database sync
     - require:
-      - ini: /etc/designate/designate.conf
+      - file: /etc/designate/designate.conf
+      - pkg: designate_server_packages
 
 designate_pool_sync:
   cmd.run:
     - name: designate-manage pool-manager-cache sync
     - require:
-      - ini: /etc/designate/designate.conf
+      - file: /etc/designate/designate.conf
+      - pkg: designate_server_packages
 
 designate_server_services:
   service.running:
     - enable: true
     - names: {{ server.services }}
     - require:
-      - cmd: designate_db_sync
+      - cmd: designate_syncdb
       - cmd: designate_pool_sync
     - watch:
-      - ini: /etc/designate/designate.conf
+      - file: /etc/designate/designate.conf
 
 {%- endif %}

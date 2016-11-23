@@ -8,3 +8,12 @@
         'services': ['designate-central', 'designate-api', 'designate-mdns', 'designate-pool-manager'],
     },
 }, merge=pillar.designate.get('server', {})) %}
+
+{% set client = salt['grains.filter_by']({
+    'Debian': {
+        'pkgs': ['python-designateclient'],
+    },
+    'RedHat': {
+        'pkgs': ['python-designateclient'],
+    },
+}, merge=pillar.designate.get('client', {})) %}

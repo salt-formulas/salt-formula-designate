@@ -1,7 +1,12 @@
-salt-formula-designate
-======================
 
-Designate provides DNSaaS services for OpenStack ## Sample pillars
+=================
+Designate formula
+=================
+
+Designate provides DNSaaS services for OpenStack.
+
+Sample pillars
+==============
 
 .. code:: yaml
 
@@ -34,7 +39,7 @@ Designate provides DNSaaS services for OpenStack ## Sample pillars
               type:  bind9
 
 Usage
------
+=====
 
 Create server
 

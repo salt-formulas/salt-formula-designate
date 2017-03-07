@@ -1,7 +1,9 @@
 designate:
   server:
+    backend:
+      bind9:
+        rndc_key: MqoG9BsOgQgwB5sch/oJqA==
     enabled: true
-    local_bind: true
     region: RegionOne
     domain_id: 5186883b-91fb-4891-bd49-e6769234a8fc
     version: ${_param:designate_version}

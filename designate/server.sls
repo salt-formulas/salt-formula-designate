@@ -1,23 +1,21 @@
 {%- from "designate/map.jinja" import server with context %}
 {%- if server.enabled %}
 
-{%- if server.local_bind %}
-bind9:
+{%- if server.backend.bind9 is defined %}
+bind9utils:
   pkg.installed
 
-/etc/bind/named.conf.options:
+{%- if server.backend.bind9.rndc_key is defined %}
+
+/etc/designate/rndc.key:
   file.managed:
-    - source: salt://designate/files/named.conf.options
+    - source: salt://designate/files/rndc.key
     - template: jinja
     - require:
-      - pkg: bind9
+      - pkg: bind9utils
 
-bind9_service:
-  service.running:
-    - enable: true
-    - name: bind9
-    - watch:
-      - file: /etc/bind/named.conf.options
+{%- endif %}
+
 {%- endif %}
 
 designate_server_packages:

@@ -12,6 +12,9 @@ Sample pillars
 
       designate:
         server:
+          backend:
+            bind9:
+              rndc_key: AahjHKbdslHOLs42h/asQA==
           database:
             host: ${_param:database_vip_address}
           notification: true

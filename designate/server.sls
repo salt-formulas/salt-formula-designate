@@ -2,8 +2,11 @@
 {%- if server.enabled %}
 
 {%- if server.backend.bind9 is defined %}
-bind9utils:
-  pkg.installed
+
+designate_bind_packages:
+  pkg.installed:
+    - names:
+      - bind9utils
 
 {%- if server.backend.bind9.rndc_key is defined %}
 

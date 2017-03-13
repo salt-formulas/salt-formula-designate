@@ -19,7 +19,7 @@ debug = False
 #log_config = None
 
 # Log directory
-logdir = /var/log/designate
+#logdir = /var/log/designate
 
 # Driver used for issuing notifications
 {%- if server.notification is defined %}
@@ -43,7 +43,19 @@ notification_topics = {{ server.notification.topics }}
 # Which networking API to use, Defaults to neutron
 #network_api = neutron
 
+# Supported record types
+#supported_record_type = A, AAAA, CNAME, MX, SRV, TXT, SPF, NS, PTR, SSHFP, SOA
+
+#-----------------------
 # RabbitMQ Config
+#-----------------------
+[oslo_messaging_rabbit]
+#rabbit_userid = guest
+#rabbit_password = guest
+#rabbit_virtual_host = /
+#rabbit_use_ssl = False
+#rabbit_hosts = 127.0.0.1:5672
+
 rabbit_userid = {{ server.message_queue.user }}
 rabbit_password = {{ server.message_queue.password }}
 rabbit_virtual_host = {{ server.message_queue.virtual_host }}
@@ -91,6 +103,10 @@ rabbit_port = {{ server.message_queue.port }}
 # Tenant ID to own all managed resources - like auto-created records etc.
 #managed_resource_tenant_id = 123456
 
+# What filters to use. They are applied in order listed in the option, from
+# left to right
+#scheduler_filters = default_pool
+
 #-----------------------
 # API Service
 #-----------------------
@@ -105,12 +121,15 @@ rabbit_port = {{ server.message_queue.port }}
 #enable_host_header = False
 
 # The base uri used in responses
+#api_base_uri = 'http://127.0.0.1:9001/'
 api_base_uri = http://{{ server.bind.api.address }}:9001/
 
 # Address to bind the API server
+#api_host = 0.0.0.0
 api_host = {{ server.bind.api.address }}
 
 # Port the bind the API server to
+#api_port = 9001
 api_port = 9001
 
 # Maximum line size of message headers to be accepted. max_header_line may
@@ -119,19 +138,24 @@ api_port = 9001
 #max_header_line = 16384
 
 # Authentication strategy to use - can be either "noauth" or "keystone"
+#auth_strategy = keystone
 auth_strategy = keystone
 
 # Enable Version 1 API (deprecated)
+#enable_api_v1 = True
 enable_api_v1 = True
 
 # Enabled API Version 1 extensions
 # Can be one or more of : diagnostics, quotas, reports, sync, touch
+#enabled_extensions_v1 =
 enabled_extensions_v1 = diagnostics, quotas, reports, sync, touch
 
 # Enable Version 2 API
+#enable_api_v2 = True
 enable_api_v2 = True
 
 # Enabled API Version 2 extensions
+#enabled_extensions_v2 =
 enabled_extensions_v2 = quotas, reports
 
 # Default per-page limit for the V2 API, a value of None means show all results
@@ -145,7 +169,7 @@ enabled_extensions_v2 = quotas, reports
 #enable_api_admin = False
 
 # Enabled Admin API extensions
-# Can be one or more of : reports, quotas, counts, tenants, zones
+# Can be one or more of : reports, quotas, counts, tenants, target_sync
 # zone export is in zones extension
 #enabled_extensions_admin =
 
@@ -171,6 +195,56 @@ auth_protocol = http
 admin_tenant_name = {{ server.identity.tenant }}
 admin_user = {{ server.identity.user }}
 admin_password = {{ server.identity.password }}
+#memcached_servers = localhost:11211
+
+#-----------------------
+# CORS Middleware
+#-----------------------
+[cors]
+
+# Indicate whether this resource may be shared with the domain received in the
+# requests "origin" header. (list value)
+#allowed_origin = <None>
+
+# Indicate that the actual request can include user credentials (boolean value)
+#allow_credentials = true
+
+# Indicate which headers are safe to expose to the API. Defaults to HTTP Simple
+# Headers. (list value)
+#expose_headers = X-OpenStack-Request-ID,Host
+
+# Maximum cache age of CORS preflight requests. (integer value)
+#max_age = 3600
+
+# Indicate which methods can be used during the actual request. (list value)
+#allow_methods = GET,PUT,POST,DELETE,PATCH,HEAD
+
+# Indicate which header field names may be used during the actual request.
+# (list value)
+#allow_headers = X-Auth-Token,X-Auth-Sudo-Tenant-ID,X-Auth-Sudo-Project-ID,X-Auth-All-Projects,X-Designate-Edit-Managed-Records
+
+[cors.subdomain]
+
+# Indicate whether this resource may be shared with the domain received in the
+# requests "origin" header. (list value)
+#allowed_origin = <None>
+
+# Indicate that the actual request can include user credentials (boolean value)
+#allow_credentials = true
+
+# Indicate which headers are safe to expose to the API. Defaults to HTTP Simple
+# Headers. (list value)
+#expose_headers = X-OpenStack-Request-ID,Host
+
+# Maximum cache age of CORS preflight requests. (integer value)
+#max_age = 3600
+
+# Indicate which methods can be used during the actual request. (list value)
+#allow_methods = GET,PUT,POST,DELETE,PATCH,HEAD
+
+# Indicate which header field names may be used during the actual request.
+# (list value)
+#allow_headers = X-Auth-Token,X-Auth-Sudo-Tenant-ID,X-Auth-Sudo-Project-ID,X-Auth-All-Projects,X-Designate-Edit-Managed-Records
 
 #-----------------------
 # Sink Service
@@ -179,6 +253,7 @@ admin_password = {{ server.identity.password }}
 # List of notification handlers to enable, configuration of these needs to
 # correspond to a [handler:my_driver] section below or else in the config
 # Can be one or more of : nova_fixed, neutron_floatingip
+#enabled_notification_handlers =
 enabled_notification_handlers = nova_fixed, neutron_floatingip
 
 #-----------------------
@@ -256,6 +331,16 @@ enabled_notification_handlers = nova_fixed, neutron_floatingip
 # How old deleted records should be (deleted_at) to be purged, in seconds
 #time_threshold = 604800  # 7 days
 
+#------------------------
+# Delayed zones NOTIFY
+#------------------------
+[zone_manager_task:delayed_notify]
+# How frequently to scan for zones pending NOTIFY, in seconds
+#interval = 5
+
+# How many zones to receive NOTIFY on each run
+#batch_size = 100
+
 #-----------------------
 # Pool Manager Service
 #-----------------------
@@ -267,6 +352,7 @@ enabled_notification_handlers = nova_fixed, neutron_floatingip
 #threads = 1000
 
 # The ID of the pool managed by this instance of the Pool Manager
+#pool_id = 794ccc2c-d751-44fe-b57f-8894c9f5c842
 {%- if server.pool is defined %}
 pool_id = {{ server.pool.pool_id }}
 {%- endif %}
@@ -319,7 +405,9 @@ pool_id = {{ server.pool.pool_id }}
 # SQLAlchemy Pool Manager Cache
 #-----------------------
 [pool_manager_cache:sqlalchemy]
+#connection = sqlite:///$state_path/designate_pool_manager.sqlite
 connection = {{ server.database.engine }}://{{ server.database.user }}:{{ server.database.password }}@{{ server.database.host }}/{{ server.database.name.pool_manager }}
+
 #connection_debug = 100
 #connection_trace = False
 #sqlite_synchronous = True
@@ -340,6 +428,11 @@ connection = {{ server.database.engine }}://{{ server.database.user }}:{{ server
 
 # This section does not have the defaults filled in but demonstrates an
 # example pool / server set up. Different backends will have different options.
+
+#[pool:794ccc2c-d751-44fe-b57f-8894c9f5c842]
+#nameservers = 0f66b842-96c2-4189-93fc-1dc95a08b012
+#targets = f26e0b32-736f-4f0a-831b-039a415c481e
+#also_notifies = 192.0.2.1:53, 192.0.2.2:53
 {%- if server.pool is defined %}
 [pool:{{ server.pool.pool_id }}]
 nameservers = {% for nameserver in server.pool.nameservers -%}
@@ -347,19 +440,26 @@ nameservers = {% for nameserver in server.pool.nameservers -%}
                    {%- if not loop.last -%},{%- endif -%}
               {% endfor %}
 targets = {{ server.pool.targets.uuid }}
-#also_notifies = 192.0.2.1:53, 192.0.2.2:53
 
 {% for nameserver in server.pool.nameservers -%}
 [pool_nameserver:{{ nameserver.uuid }}]
 port = {{ nameserver.port }}
 host = {{ nameserver.host }}
 {% endfor -%}
+#[pool_nameserver:0f66b842-96c2-4189-93fc-1dc95a08b012]
+#port = 53
+#host = 192.168.27.100
 
 [pool_target:{{ server.pool.targets.uuid }}]
 options = {{ server.pool.targets.options }}
 masters = {{ server.pool.targets.masters }}
 type = {{ server.pool.targets.type }}
 {%- endif %}
+#[pool_target:f26e0b32-736f-4f0a-831b-039a415c481e]
+#options = rndc_host: 192.168.27.100, rndc_port: 953, rndc_config_file: /etc/bind/rndc.conf, rndc_key_file: /etc/bind/rndc.key, port: 53, host: 192.168.27.100, clean_zonefile: false
+#masters = 192.168.27.100:5354
+#type = bind9
+
 
 ##############
 ## Network API
@@ -386,7 +486,9 @@ type = {{ server.pool.targets.type }}
 [storage:sqlalchemy]
 # Database connection string - to configure options for a given implementation
 # like sqlalchemy or other see below
+#connection = sqlite:///$state_path/designate.sqlite
 connection = {{ server.database.engine }}://{{ server.database.user }}:{{ server.database.password }}@{{ server.database.host }}/{{ server.database.name.main_database }}
+
 #connection_debug = 0
 #connection_trace = False
 #sqlite_synchronous = True
@@ -402,6 +504,7 @@ connection = {{ server.database.engine }}://{{ server.database.user }}:{{ server
 #-----------------------
 [handler:nova_fixed]
 # Domain ID of domain to create records in. Should be pre-created
+#domain_id =
 domain_id = {{ server.domain_id }}
 notification_topics = notifications
 control_exchange = 'neutron'
@@ -413,6 +516,7 @@ format = '%(hostname)s.%(domain)s'
 #------------------------
 [handler:neutron_floatingip]
 # Domain ID of domain to create records in. Should be pre-created
+#domain_id =
 domain_id = {{ server.domain_id }}
 notification_topics = notifications
 control_exchange = 'neutron'

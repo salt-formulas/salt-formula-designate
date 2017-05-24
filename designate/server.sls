@@ -1,12 +1,12 @@
 {%- from "designate/map.jinja" import server with context %}
 {%- if server.enabled %}
 
+{%- if server.backend is defined %}
+
 {%- if server.backend.bind9 is defined %}
 
-designate_bind_packages:
-  pkg.installed:
-    - names:
-      - bind9utils
+include:
+- bind
 
 {%- if server.backend.bind9.rndc_key is defined %}
 
@@ -16,6 +16,9 @@ designate_bind_packages:
     - template: jinja
     - require:
       - pkg: bind9utils
+      - pkg: designate_server_packages
+
+{%- endif %}
 
 {%- endif %}
 
@@ -63,4 +66,20 @@ designate_server_services:
     - watch:
       - file: /etc/designate/designate.conf
 
+{%- if server.version not in ['liberty', 'juno', 'kilo'] and server.pools is defined %}
+# Since Mitaka it is recommended to use pools.yaml for pools configuration
+/etc/designate/pools.yaml:
+  file.managed:
+  - source: salt://designate/files/{{ server.version }}/pools.yaml
+  - template: jinja
+  - require:
+    - pkg: designate_server_packages
+
+designate_pool_update:
+  cmd.run:
+    - name: designate-manage pool update
+    - require:
+      - file: /etc/designate/pools.yaml
+      - service: designate_server_services
+{%- endif %}
 {%- endif %}

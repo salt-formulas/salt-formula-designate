@@ -1,13 +1,27 @@
+{%- set version = salt['pillar.get']('designate:server:version') -%}
+{%- if version not in ['mitaka','liberty', 'juno', 'kilo'] %}
+{% set server = salt['grains.filter_by']({
+    'Debian': {
+        'pkgs': ['designate', 'designate-producer', 'designate-mdns', 'designate-sink', 'designate-worker'],
+        'services': ['designate-agent', 'designate-api', 'designate-central', 'designate-mdns', 'designate-producer', 'designate-sink', 'designate-worker'],
+    },
+    'RedHat': {
+        'pkgs': ['openstack-designate-api', 'openstack-designate-central', 'openstack-designate-sink', 'openstack-designate-producer', 'openstack-designate-worker', 'openstack-designate-mdns', 'openstack-designate-common', 'python-designate', 'python-designateclient', 'openstack-designate-agent'],
+        'services': ['designate-central', 'designate-api', 'designate-mdns', 'designate-producer', 'designate-worker'],
+    },
+}, merge=pillar.designate.get('server', {})) %}
+{%- else %}
 {% set server = salt['grains.filter_by']({
     'Debian': {
         'pkgs': ['designate', 'designate-pool-manager', 'designate-mdns', 'designate-sink', 'designate-zone-manager'],
         'services': ['designate-agent', 'designate-api', 'designate-central', 'designate-mdns', 'designate-pool-manager', 'designate-sink', 'designate-zone-manager'],
     },
     'RedHat': {
-        'pkgs': ['openstack-designate-api', 'openstack-designate-central', 'openstack-designate-sink', 'openstack-designate-pool-manager', 'openstack-designate-mdns', 'openstack-designate-common', 'python-designate', 'python-designateclient', 'openstack-designate-agent'],
-        'services': ['designate-central', 'designate-api', 'designate-mdns', 'designate-pool-manager'],
+        'pkgs': ['openstack-designate-api', 'openstack-designate-central', 'openstack-designate-sink', 'openstack-designate-pool-manager', 'openstack-designate-zone-manager', 'openstack-designate-mdns', 'openstack-designate-common', 'python-designate', 'python-designateclient', 'openstack-designate-agent'],
+        'services': ['designate-central', 'designate-api', 'designate-mdns', 'designate-pool-manager', 'designate-zone-manager'],
     },
 }, merge=pillar.designate.get('server', {})) %}
+{%- endif %}
 
 {% set client = salt['grains.filter_by']({
     'Debian': {

@@ -47,14 +47,12 @@ designate_syncdb:
     - name: designate-manage database sync
     - require:
       - file: /etc/designate/designate.conf
-      - pkg: designate_server_packages
 
 designate_pool_sync:
   cmd.run:
     - name: designate-manage pool-manager-cache sync
     - require:
       - file: /etc/designate/designate.conf
-      - pkg: designate_server_packages
 
 designate_server_services:
   service.running:

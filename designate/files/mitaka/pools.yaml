@@ -1,6 +1,6 @@
 {%- from "designate/map.jinja" import server with context %}
-{% for pool in server.pools -%}
-- name: {{ pool.name }}
+{% for pool_name, pool in server.pools.iteritems() -%}
+- name: {{ pool_name }}
   # The name is immutable. There will be no option to change the name after
   # creation and the only way will to change it will be to delete it
   # (and all zones associated with it) and recreate it.
@@ -35,7 +35,7 @@
   # List out the targets for this pool. For DNS there will be one
   # entry for each DNS server, as we have to run rndc command on each server
   targets:
-    {% for target in pool.targets -%}
+    {% for target_name, target in pool.targets.iteritems() -%}
     - type: {{ target.type }}
       description: {{ target.description }}
 

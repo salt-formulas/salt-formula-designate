@@ -10,7 +10,7 @@ designate:
         - host: 127.0.1.1
         - host: 127.0.2.1
     pools:
-      - name: default
+      default:
         description: 'default pool'
         attributes:
           service_tier: GOLD
@@ -26,7 +26,8 @@ designate:
           - host: 127.0.2.1
             port: 53
         targets:
-          - type: bind9
+          default_target:
+            type: bind9
             description: 'default target'
             masters:
               - host: 127.0.0.1

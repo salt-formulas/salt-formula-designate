@@ -15,7 +15,6 @@ include:
     - source: salt://designate/files/rndc.key
     - template: jinja
     - require:
-      - pkg: bind9utils
       - pkg: designate_server_packages
 
 {%- endif %}

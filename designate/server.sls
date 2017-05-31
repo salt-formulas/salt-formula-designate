@@ -41,6 +41,7 @@ designate_server_packages:
   - require:
     - pkg: designate_server_packages
 
+{%- if not grains.get('noservices', False) %}
 designate_syncdb:
   cmd.run:
     - name: designate-manage database sync
@@ -62,6 +63,7 @@ designate_server_services:
       - cmd: designate_pool_sync
     - watch:
       - file: /etc/designate/designate.conf
+{%- endif %}
 
 {%- if server.version not in ['liberty', 'juno', 'kilo'] and server.pools is defined %}
 # Since Mitaka it is recommended to use pools.yaml for pools configuration
@@ -72,11 +74,13 @@ designate_server_services:
   - require:
     - pkg: designate_server_packages
 
+{%- if not grains.get('noservices', False) %}
 designate_pool_update:
   cmd.run:
     - name: designate-manage pool update
     - require:
       - file: /etc/designate/pools.yaml
       - service: designate_server_services
+{%- endif %}
 {%- endif %}
 {%- endif %}

@@ -1,0 +1,61 @@
+---
+driver:
+  name: docker
+  hostname: designate.ci.local
+  use_sudo: true
+
+provisioner:
+  name: salt_solo
+  salt_install: bootstrap
+  salt_bootstrap_url: https://bootstrap.saltstack.com
+  salt_version: latest
+  require_chef: false
+  log_level: error
+  formula: designate
+  grains:
+    noservices: True
+  dependencies:
+    - name: linux
+      repo: git
+      source: https://github.com/salt-formulas/salt-formula-linux
+    - name: mysql
+      repo: git
+      source: https://github.com/salt-formulas/salt-formula-mysql
+    - name: rabbitmq
+      repo: git
+      source: https://github.com/salt-formulas/salt-formula-rabbitmq
+  state_top:
+    base:
+      "*":
+        - linux
+        - mysql
+#TODO: use rabbitmq when https://mirantis.jira.com/browse/PROD-11712 is fixed
+#        - rabbitmq
+        - designate
+  pillars:
+    top.sls:
+      base:
+        "*":
+          - linux_repo_openstack
+          - designate
+  pillars-from-files:
+    linux_repo_openstack.sls: tests/pillar/repo_mcp_openstack.sls
+
+verifier:
+  name: inspec
+  sudo: true
+
+platforms:
+  - name: <%= ENV['PLATFORM'] || 'ubuntu-xenial' %>
+    driver_config:
+      image: <%= ENV['PLATFORM'] || 'trevorj/salty-whales:xenial' %>
+      platform: ubuntu
+
+suites:
+
+  - name: designate_without_backend
+    provisioner:
+      pillars-from-files:
+        designate.sls: tests/pillar/designate_ocata.sls
+
+# vim: ft=yaml sw=2 ts=2 sts=2 tw=125

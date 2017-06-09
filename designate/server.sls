@@ -79,8 +79,9 @@ designate_pool_update:
   cmd.run:
     - name: designate-manage pool update
     - require:
-      - file: /etc/designate/pools.yaml
       - service: designate_server_services
+    - onchanges:
+      - file: /etc/designate/pools.yaml
 {%- endif %}
 {%- endif %}
 {%- endif %}

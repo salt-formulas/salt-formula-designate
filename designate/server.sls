@@ -5,8 +5,10 @@
 
 {%- if server.backend.bind9 is defined %}
 
-include:
-- bind
+designate_bind_packages:
+  pkg.installed:
+    - names:
+      - bind9utils
 
 {%- if server.backend.bind9.rndc_key is defined %}
 

@@ -55,8 +55,9 @@
         rndc_host: {{ target.options.rndc_host }}
         rndc_port: {{ target.options.rndc_port }}
         rndc_key_file: {{ target.options.rndc_key_file }}
-        {%- elif target.type == 'powerdns' %}
-        connection: {{ target.options.connection }}
+        {%- elif target.type == 'pdns4' %}
+        api_endpoint: {{ target.options.api_endpoint }}
+        api_token: {{ target.options.api_token }}
         {%- endif %}
     {% endfor -%}
 

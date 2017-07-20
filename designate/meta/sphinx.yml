@@ -16,8 +16,8 @@ doc:
           name: "UUID of managed DNS zone"
           value: {{ server.domain_id }}
         bind:
-          api:
-            value: {{ server.bind.api.address }}
+          name: "Bind API address"
+          value: {{ server.bind.api.address }}
         version:
           name: "Version"
           value: {{ server.version }}

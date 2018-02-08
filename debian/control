@@ -10,6 +10,6 @@ Vcs-Git: https://github.com/Mirantis/salt-formula-designate.git
 
 Package: salt-formula-designate
 Architecture: all
-Depends: ${misc:Depends}, salt-master, reclass
+Depends: ${misc:Depends}
 Description: designate salt formula
  Install and configure Designate (DNSaaS component for OpenStackx).

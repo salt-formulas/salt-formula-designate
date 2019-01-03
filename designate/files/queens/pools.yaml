@@ -1,0 +1,73 @@
+{%- from "designate/map.jinja" import server with context %}
+{% for pool_name, pool in server.pools.iteritems() -%}
+- name: {{ pool_name }}
+  # The name is immutable. There will be no option to change the name after
+  # creation and the only way will to change it will be to delete it
+  # (and all zones associated with it) and recreate it.
+  description: {{ pool.description }}
+
+  {%- if pool.attributes is defined %}
+  # Attributes are Key:Value pairs that describe the pool. for example the level
+  # of service (i.e. service_tier:GOLD), capabilities (i.e. anycast: true) or
+  # other metadata. Users can use this information to point their zones to the
+  # correct pool
+  attributes:
+    {%- for k,v in pool.attributes.items() %}
+    {{ k }}: {{ v }}
+    {%- endfor %}
+  {%- endif %}
+
+  # List out the NS records for zones hosted within this pool
+  ns_records:
+    {% for rec in pool.ns_records -%}
+    - hostname: {{ rec.hostname }}
+      priority: {{ rec.priority }}
+    {% endfor -%}
+
+  # List out the nameservers for this pool. These are the actual DNS servers.
+  # We use these to verify changes have propagated to all nameservers.
+  nameservers:
+    {% for nameserver in pool.nameservers -%}
+    - host: {{ nameserver.host }}
+      port: {{ nameserver.port }}
+    {% endfor -%}
+
+  # List out the targets for this pool. For DNS there will be one
+  # entry for each DNS server, as we have to run rndc command on each server
+  targets:
+    {% for target_name, target in pool.targets.iteritems() -%}
+    - type: {{ target.type }}
+      description: {{ target.description }}
+
+      # List out the designate-mdns servers from which DNS servers should
+      # request zone transfers (AXFRs) from.
+      masters:
+        {% for master in target.masters -%}
+        - host: {{ master.host }}
+          port: {{ master.port }}
+        {% endfor -%}
+
+      # DNS server Configuration options
+      options:
+        host: {{ target.options.host }}
+        port: {{ target.options.port }}
+        {%- if target.type == 'bind9' %}
+        rndc_host: {{ target.options.rndc_host }}
+        rndc_port: {{ target.options.rndc_port }}
+        rndc_key_file: {{ target.options.rndc_key_file }}
+        {%- elif target.type == 'pdns4' %}
+        api_endpoint: {{ target.options.api_endpoint }}
+        api_token: {{ target.options.api_token }}
+        {%- endif %}
+    {% endfor -%}
+
+  {%- if pool.also_notifies is defined %}
+  # Optional list of additional IP/Port's for which designate-mdns will send
+  # DNS NOTIFY packets to
+  also_notifies:
+    {%- for notify in pool.also_notifies %}
+    - host: {{ notify.host }}
+      port: {{ notify.port }}
+    {%- endfor %}
+  {%- endif %}
+{%- endfor %}

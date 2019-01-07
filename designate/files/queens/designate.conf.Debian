@@ -292,6 +292,8 @@ zone_id = {{ server.domain_id }}
 # IPv4 format (multi valued)
 #formatv4 =
 formatv4 = '%(hostname)s.%(zone)s'
+formatv4 = '%(octet0)s-%(octet1)s-%(octet2)s-%(octet3)s.%(zone)s'
+formatv4 = '%(hostname)s.%(project)s.%(zone)s'
 
 # DEPRECATED: format which replaced by formatv4/formatv6 (multi valued)
 # This option is deprecated for removal.
@@ -302,6 +304,7 @@ formatv4 = '%(hostname)s.%(zone)s'
 # IPv6 format (multi valued)
 #formatv6 =
 formatv6 = '%(hostname)s.%(zone)s'
+formatv6 = '%(hostname)s.%(project)s.%(zone)s'
 
 
 [handler:nova_fixed]
@@ -323,7 +326,8 @@ zone_id = {{ server.domain_id }}
 # IPv4 format (multi valued)
 #formatv4 =
 formatv4 = '%(hostname)s.%(zone)s'
-
+formatv4 = '%(octet0)s-%(octet1)s-%(octet2)s-%(octet3)s.%(zone)s'
+formatv4 = '%(hostname)s.%(project)s.%(zone)s'
 # DEPRECATED: format which replaced by formatv4/formatv6 (multi valued)
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
@@ -333,7 +337,7 @@ formatv4 = '%(hostname)s.%(zone)s'
 # IPv6 format (multi valued)
 #formatv6 =
 formatv6 = '%(hostname)s.%(zone)s'
-
+formatv6 = '%(hostname)s.%(project)s.%(zone)s'
 
 [healthcheck]
 
@@ -504,7 +508,7 @@ formatv6 = '%(hostname)s.%(zone)s'
 #endpoints = <None>
 
 # Endpoint type to use (string value)
-#endpoint_type = publicURL
+endpoint_type = internalURL
 
 # timeout value for connecting to neutron in seconds (integer value)
 #timeout = 30
@@ -621,7 +625,7 @@ formatv6 = '%(hostname)s.%(zone)s'
 # Deprecated group/name - [DATABASE]/sql_connection
 # Deprecated group/name - [sql]/connection
 #connection = <None>
-connection = {{ server.database.engine }}://{{ server.database.user }}:{{ server.database.password }}@{{ server.database.host }}/{{ server.database.name.pool_manager }}
+connection = {{ server.database.engine }}+pymysql://{{ server.database.user }}:{{ server.database.password }}@{{ server.database.host }}/{{ server.database.name.pool_manager }}
 
 
 # The SQLAlchemy connection string to use to connect to the slave database.
@@ -889,6 +893,7 @@ connection = {{ server.database.engine }}://{{ server.database.user }}:{{ server
 #api_port = <None>
 
 # API host:port pairs to listen on (list value)
+listen = {{ server.bind.api.address }}:9001
 #listen = 0.0.0.0:9001
 
 # File name for the paste.deploy config for designate-api (string value)
@@ -1283,7 +1288,7 @@ workers = 3
 # Deprecated group/name - [DATABASE]/sql_connection
 # Deprecated group/name - [sql]/connection
 #connection = <None>
-connection = {{ server.database.engine }}://{{ server.database.user }}:{{ server.database.password }}@{{ server.database.host }}/{{ server.database.name.main_database }}
+connection = {{ server.database.engine }}+pymysql://{{ server.database.user }}:{{ server.database.password }}@{{ server.database.host }}/{{ server.database.name.main_database }}
 
 # The SQLAlchemy connection string to use to connect to the slave database.
 # (string value)
